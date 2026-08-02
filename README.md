@@ -4,7 +4,9 @@ Ce projet a pour objectif de récupérer les données des opérations bancaires 
 
 Il utilise la librairie [Playwright](https://playwright.dev/python/) pour naviguer sur le site de la banque.
 
-## Format des données
+## Export JSON
+
+### Format des données
 
 Le scraper récupère les données au format JSON.
 
@@ -20,7 +22,7 @@ Les principaux champs incluent :
 - Montant en devise (si applicable)
 - Indication de lieu (souvent incorrect)
 
-## Résultat
+### Résultat
 
 Les fichiers sont enregistrés dans un répertoire nommé `data/transactions`.
 
@@ -29,6 +31,11 @@ Ils sont rangés des sous-répertoires `année/mois/jour`.
 Les opérations en traitement sont enregistrées dans le répertoire `authorization/new`.
 
 Les anciennes opérations en traitement sont enregistrées dans le répertoire `authorization/old`.
+
+## Export OFX
+
+Génère le fichier OFX proposé par Boursobank à partir de la page dédiée. Fichier généré pour tous les comptes ou pour un compte spécifique.
+La plage d'export est paramétré dans config.yaml (voir plus loin).
 
 ## Installation
 
@@ -63,7 +70,6 @@ Pour mettre à jour `boursobank-scraper`, exécutez simplement la commande :
 uv tool upgrade boursobank-scraper
 ```
 
-
 ### Configuration
 
 Le programme a besoin d'un répertoire contenant le fichier de configuration `config.yaml`.
@@ -84,7 +90,8 @@ password: 87654321 # optionnel
 headless: false # optionnel, défaut : False
 timeoutMs: 15000 # optionnel, défaut : 30000 millisecondes
 saveTrace: true # optionnel, défaut : false
-
+ofxNbMonthsBefore: 2 # optionnel, défaut : 2. Nombre de mois à prendre dans le passé => "Date from" sera le premier jour de ce mois calculé.
+ofxNbMonthsAfter: 1 # optionnel, défaut : 1. Nombre de mois à prendre dans le futur => "Date to" sera le dernier jour de ce mois calculé.
 ```
 
 > **Attention : le mot de passe n'est pas crypté !**
@@ -129,7 +136,13 @@ Une fois le script exécuté, les fichiers de transactions sont disponibles dans
 >
 > Les anciennes opérations peuvent toutefois être supprimées à condition de garder au moins les 50 dernières sur chaque compte.
 
-#### Synthèse des comptes
+### Paramètres de ligne de commande
+
+--data-folder : Chemin vers le répertoire de données. Si non spécifié, utilise le répertoire courant.
+--select-account : Affiche la liste des comptes trouvés et demande lequel exporter.
+--export-type : Type d'export : 'json' (par défaut, comportement actuel) ou 'ofx' (export via le bouton 'Exporter les opérations' de la page du compte).
+
+### Synthèse des comptes
 
 Un fichier `accounts.json` est régénéré à chaque exécution. Ilcontient la liste des comptes bancaires. Chaque compte est représenté par un objet JSON avec les informations suivantes :
 - `id`: identifiant unique du compte.
