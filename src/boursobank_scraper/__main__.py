@@ -70,7 +70,7 @@ def main() -> None:
 
     if config.password is None:
         try:
-            config.password = int(getpass.getpass("Password:"))
+            config.password = int(getpass.getpass("Boursobank password:"))
         except ValueError:
             print("Erreur : le mot de passe ne doit contenir que des chiffres")
             exit(1)
@@ -97,6 +97,10 @@ def main() -> None:
         )
 
         if boursoScraper.connect():
+            accounts = list(boursoScraper.listAccounts())
+            accountsFilePath = rootDataPath / "accounts.json"
+            accountsFilePath.write_bytes(msgspec.json.encode(accounts))
+
             if args.export_type == 'ofx' and not args.select_account:
                 allAccount = BoursoAccount(
                     id="all",
@@ -106,10 +110,6 @@ def main() -> None:
                 )
                 boursoScraper.saveAccountTransactionsAsOfx(allAccount)
             else:
-                accounts = list(boursoScraper.listAccounts())
-                accountsFilePath = rootDataPath / "accounts.json"
-                accountsFilePath.write_bytes(msgspec.json.encode(accounts))
-
                 if args.select_account:
                     accounts = selectAccounts(accounts)
 
